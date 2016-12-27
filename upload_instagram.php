@@ -1,7 +1,7 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+#ini_set('display_errors', 1);
+#ini_set('display_startup_errors', 1);
+#error_reporting(E_ALL);
 
 require("vendor/autoload.php");
 $instagram = new \InstagramAPI\Instagram();
@@ -14,8 +14,21 @@ $debug = false;
 $base_dir = 'images';
 $image_dir = "$base_dir/todo";
 $completed_dir="$base_dir/done";
+$error_dir = "$base_dir/error";
+
+if(! is_dir($image_dir)){
+    mkdir($image_dir);
+}
+if(! is_dir($completed_dir)){
+    mkdir($completed_dir);
+}
+if(! is_dir($error_dir)){
+    mkdir($error_dir);
+}
+
+
 $number_of_files_to_upload = rand(1,10);
-$number_of_files_to_upload = 2;
+$number_of_files_to_upload = 5;
 
 //////////////////////
 $it = new RecursiveDirectoryIterator($image_dir);
@@ -66,14 +79,17 @@ for($i = 1 ; $i<= $number_of_files_to_upload; $i++){
         $success=0;
         print $e->getMessage();
         print "Failed to upload $photo\t" . date(DATE_RFC2822) . "\n";
-    }
+        $fn = basename($photo);
+        rename($photo,"$error_dir/$fn");
+
+        }
     if($success==1){
         $fn = basename($photo);
         rename($photo,"$completed_dir/$fn");
         print "Successfully uploaded $photo\t" . date(DATE_RFC2822) . "\n"; 
         
         //Not logged 
-        $msg = "About to upload $photo"; 
+        $msg = "About to sleep 10"; 
         fwrite(STDERR, "$msg\n"); 
         sleep(10);
     }
