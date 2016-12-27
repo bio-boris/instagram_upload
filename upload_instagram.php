@@ -79,5 +79,5 @@ for($i = 1 ; $i<= $number_of_files_to_upload; $i++){
     }
 }
 
-fclose(handle)write(STDERR, "\n\n");
+fwrite(STDERR, "\n\n");
 ?>
