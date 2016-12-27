@@ -6,6 +6,9 @@ error_reporting(E_ALL);
 require("vendor/autoload.php");
 $instagram = new \InstagramAPI\Instagram();
 
+
+
+
 /////// CONFIG ///////
 $username = 'bsadkhin2';
 $password = 'password123!';
@@ -15,26 +18,39 @@ $base_dir = 'images';
 $image_dir = "$base_dir/todo";
 $completed_dir="$base_dir/done";
 $number_of_files_to_upload = rand(1,10);
+$number_of_files_to_upload = 2;
 
 //////////////////////
-$command= "find $image_dir -type f";
-$files = array();
-exec($command,$files);
+$it = new RecursiveDirectoryIterator($image_dir);
+$allowed = Array ( 'jpeg', 'jpg','png' );
+$files = Array();
+foreach(new RecursiveIteratorIterator($it) as $file)
+{
+    foreach(new RecursiveIteratorIterator($it) as $file) {
+        if(in_array(substr($file, strrpos($file, '.') + 1),$allowed)) {
+            $files[] = $file;
+        }
+    }
+}
+$count = count($files);
+$number_of_files_to_upload = $number_of_files_to_upload <= $count ? $number_of_files_to_upload : $count;
 
+///////
 
-for($i = 0 ; $i< $number_of_files_to_upload; $i++){
+for($i = 1 ; $i< $number_of_files_to_upload; $i++){
     shuffle($files);
-    $image = array_pop($files); 
-    print "About to upload $image"; 
+    $photo = array_pop($files); 
+    print "About to upload $photo ( $i of $number_of_files_to_upload) " . date(DATE_RFC2822) . "\n";
+
+    sleep(60);
 
     $i = new \InstagramAPI\Instagram($debug);
     $i->setUser($username, $password);
     try {
-        $i->login();
+        $i->login(true);
     } catch (Exception $e) {
         $e->getMessage();
         print "Couldn't login";
-        print "\t " . date(DATE_RFC2822) . "\n";
         exit();
     }
     try {
@@ -48,7 +64,7 @@ for($i = 0 ; $i< $number_of_files_to_upload; $i++){
     }
     if($success==1){
         $fn = basename($photo);
-        $rename($photo,"$completed_dir/$fn");
+        rename($photo,"$completed_dir/$fn");
     }
 }
 
